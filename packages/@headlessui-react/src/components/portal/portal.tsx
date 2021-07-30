@@ -17,21 +17,29 @@ import { useIsoMorphicEffect } from '../../hooks/use-iso-morphic-effect'
 import { usePortalRoot } from '../../internal/portal-force-root'
 import { useServerHandoffComplete } from '../../hooks/use-server-handoff-complete'
 
+// usePortalTarget 可以取得 portal 的 DOM node
 function usePortalTarget(): HTMLElement | null {
   let forceInRoot = usePortalRoot()
   let groupTarget = useContext(PortalGroupContext)
   let [target, setTarget] = useState(() => {
+    console.log('[usePortalTarget]', {
+      forceInRoot,
+      groupTarget,
+    })
+
     // Group context is used, but still null
     if (!forceInRoot && groupTarget !== null) return null
 
     // No group context is used, let's create a default portal root
     if (typeof window === 'undefined') return null
     let existingRoot = document.getElementById('headlessui-portal-root')
-    if (existingRoot) return existingRoot
+    if (existingRoot) return existingRoot // 如果存在就回傳
 
+    // 如果 portal root 還不存在，就建立在 DOM 上
+    // <div id="headlessui-portal-root"></div>
     let root = document.createElement('div')
     root.setAttribute('id', 'headlessui-portal-root')
-    return document.body.appendChild(root)
+    return document.body.appendChild(root) // 直接 append 在 body 上
   })
 
   useEffect(() => {
@@ -53,9 +61,12 @@ export function Portal<TTag extends ElementType = typeof DEFAULT_PORTAL_TAG>(
 ) {
   let passthroughProps = props
   let target = usePortalTarget()
-  let [element] = useState<HTMLDivElement | null>(() =>
-    typeof window === 'undefined' ? null : document.createElement('div')
-  )
+  // element 會是在 target 內的一個空 div
+  let [element] = useState<HTMLDivElement | null>(() => {
+    const element = document.createElement('div')
+    element.setAttribute('id', 'xxx-i-am-portal')
+    return typeof window === 'undefined' ? null : element
+  })
 
   let ready = useServerHandoffComplete()
 
@@ -63,14 +74,17 @@ export function Portal<TTag extends ElementType = typeof DEFAULT_PORTAL_TAG>(
     if (!target) return
     if (!element) return
 
+    // 把 element append 在 portal DOM node 上
     target.appendChild(element)
 
     return () => {
       if (!target) return
       if (!element) return
 
+      // 把 element 移除
       target.removeChild(element)
 
+      // 如果 target 內沒其他 Node，就把 target 移除
       if (target.childNodes.length <= 0) {
         target.parentElement?.removeChild(target)
       }
@@ -81,7 +95,8 @@ export function Portal<TTag extends ElementType = typeof DEFAULT_PORTAL_TAG>(
 
   return !target || !element
     ? null
-    : createPortal(
+    : // 把 Portal Component render 在 element 上
+      createPortal(
         render({ props: passthroughProps, defaultTag: DEFAULT_PORTAL_TAG, name: 'Portal' }),
         element
       )
