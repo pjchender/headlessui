@@ -1,5 +1,5 @@
 import React, { useState, Fragment } from 'react'
-import { Dialog, Menu, Portal, Transition } from '@headlessui/react'
+import { Dialog, Menu, Portal, Transition } from '../../src'
 import { usePopper } from '../../playground-utils/hooks/use-popper'
 
 function classNames(...classes) {
@@ -70,8 +70,8 @@ export default function Home() {
       {nested && <Nested onClose={() => setNested(false)} />}
 
       <Transition show={isOpen} as={Fragment} afterLeave={() => console.log('done')}>
-        <Dialog onClose={setIsOpen}>
-          <div className="fixed z-10 inset-0 overflow-y-auto">
+        <Dialog onClose={setIsOpen} className="xxx-dialog">
+          <div className="xxx-dialog-children fixed z-10 inset-0 overflow-y-auto">
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <Transition.Child
                 as={Fragment}
@@ -83,7 +83,7 @@ export default function Home() {
                 leaveTo="opacity-0"
                 entered="opacity-75"
               >
-                <Dialog.Overlay className="fixed inset-0 bg-gray-500 transition-opacity" />
+                <Dialog.Overlay className="xxx-dialog-overlay fixed inset-0 bg-gray-500 transition-opacity" />
               </Transition.Child>
 
               <Transition.Child
@@ -125,7 +125,7 @@ export default function Home() {
                       <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                         <Dialog.Title
                           as="h3"
-                          className="text-lg leading-6 font-medium text-gray-900"
+                          className="xxx-dialog-title text-lg leading-6 font-medium text-gray-900"
                         >
                           Deactivate account
                         </Dialog.Title>

@@ -50,13 +50,15 @@ enum ActionTypes {
 
 type Actions = { type: ActionTypes.SetTitleId; id: string | null }
 
+// reducers 是一個物件
+// key 是 titleId，value 是 函式
 let reducers: {
   [P in ActionTypes]: (
     state: StateDefinition,
     action: Extract<Actions, { type: P }>
   ) => StateDefinition
 } = {
-  [ActionTypes.SetTitleId](state, action) {
+  [ActionTypes.SetTitleId]: (state, action) => {
     if (state.titleId === action.id) return state
     return { ...state, titleId: action.id }
   },
@@ -315,11 +317,14 @@ let DialogRoot = forwardRefWithAs(function Dialog<
       }, [])}
     >
       <ForcePortalRoot force={true}>
+        {/* 把 Dialog 放在 Portal 內 */}
         <Portal>
           <DialogContext.Provider value={contextBag}>
             <Portal.Group target={internalDialogRef}>
+              {/* ForcePortalRoot 是 ForcePortalRootContext.Provider */}
               <ForcePortalRoot force={false}>
                 <DescriptionProvider slot={slot} name="Dialog.Description">
+                  {/* 這個 render 的就是 headlessui-dialog 本人 */}
                   {render({
                     props: { ...passthroughProps, ...propsWeControl },
                     slot,
